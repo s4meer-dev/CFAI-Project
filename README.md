@@ -8,4 +8,4 @@ This project compares:
 
 Using Python time module.
 
-Status: Work in progress 🚀
+
