@@ -1,2 +1,1 @@
-# app.py
-# Main application entry point for the Flask backend
+# this is where the main code goes
