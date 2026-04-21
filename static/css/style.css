@@ -32,6 +32,7 @@ header h1 {
     color: var(--accent-color);
     margin-bottom: 0.5rem;
 }
+
 .container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -52,4 +53,42 @@ header h1 {
 .card h2 {
     margin-bottom: 1.5rem;
     color: var(--accent-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-size: 1rem;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
 }
