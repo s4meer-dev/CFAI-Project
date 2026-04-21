@@ -35,7 +35,12 @@
         </section>
         
         <section class="visualization-section">
-            <!-- Chart canvas will be added here -->
+            <div class="card">
+                <h2>Performance Visualization</h2>
+                <div class="chart-container" style="position: relative; height: 60vh; width: 100%;">
+                    <canvas id="benchmarkChart"></canvas>
+                </div>
+            </div>
         </section>
     </main>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
