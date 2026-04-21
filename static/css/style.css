@@ -92,3 +92,9 @@ header h1 {
 .btn-primary:hover {
     opacity: 0.9;
 }
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
