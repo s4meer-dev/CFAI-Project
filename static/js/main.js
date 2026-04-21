@@ -9,5 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function handleFormSubmit(event) {
     event.preventDefault();
-    console.log('Form submitted. Ready to dispatch API call.');
+    
+    const form = event.target;
+    const algorithm = form.elements['algorithm'].value;
+    const dataSize = parseInt(form.elements['data-size'].value, 10);
+    
+    const payload = {
+        algorithm: algorithm,
+        data_size: dataSize
+    };
+    
+    console.log('Payload ready:', payload);
+    // Future API call will go here
 }
