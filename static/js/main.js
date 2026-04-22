@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function handleFormSubmit(event) {
+async function handleFormSubmit(event) {
     event.preventDefault();
     
     const form = event.target;
@@ -19,6 +19,18 @@ function handleFormSubmit(event) {
         data_size: dataSize
     };
     
-    console.log('Payload ready:', payload);
-    // Future API call will go here
+    try {
+        const response = await fetch('/api/benchmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        console.log('Result:', data);
+    } catch (error) {
+        console.error('Error fetching benchmark:', error);
+    }
 }
