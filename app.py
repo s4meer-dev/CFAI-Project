@@ -37,6 +37,25 @@ def merge_sort(arr):
             j += 1
             k += 1
 
+def linear_search(arr, target):
+    for i in range(len(arr)):
+        if arr[i] == target:
+            return i
+    return -1
+
+def binary_search(arr, target):
+    low = 0
+    high = len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] < target:
+            low = mid + 1
+        elif arr[mid] > target:
+            high = mid - 1
+        else:
+            return mid
+    return -1
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -48,16 +67,24 @@ def benchmark():
     size = data.get('data_size')
     
     test_data = [random.randint(1, 10000) for _ in range(size)]
+    target = test_data[-1] if test_data else -1
+    
     start_time = time.time()
     
     if alg == 'bubble_sort':
         bubble_sort(test_data)
     elif alg == 'merge_sort':
         merge_sort(test_data)
+    elif alg == 'linear_search':
+        linear_search(test_data, target)
+    elif alg == 'binary_search':
+        test_data.sort() # Ensure sorted array for binary search
+        start_time = time.time() # Reset clock after sorting
+        binary_search(test_data, target)
         
-    execution_time = time.time() - start_time
+    execution_time = (time.time() - start_time) * 1000 # Convert to ms
     
-    return jsonify({"status": "success", "algorithm": alg, "size": size, "execution_time": execution_time})
+    return jsonify({"status": "success", "algorithm": alg, "size": size, "execution_time_ms": execution_time})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
