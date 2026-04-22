@@ -45,17 +45,27 @@ function initChart() {
     });
 }
 
+function updateChart(label, time) {
+    benchmarkChart.data.labels.push(label);
+    benchmarkChart.data.datasets[0].data.push(time);
+    benchmarkChart.update();
+}
+
 async function handleFormSubmit(event) {
     event.preventDefault();
     
     const form = event.target;
     const algorithm = form.elements['algorithm'].value;
     const dataSize = parseInt(form.elements['data-size'].value, 10);
+    const btn = form.querySelector('button[type="submit"]');
     
     const payload = {
         algorithm: algorithm,
         data_size: dataSize
     };
+    
+    btn.disabled = true;
+    btn.textContent = 'Running...';
     
     try {
         const response = await fetch('/api/benchmark', {
@@ -67,8 +77,14 @@ async function handleFormSubmit(event) {
         });
         
         const data = await response.json();
-        console.log('Result:', data);
+        if (data.status === 'success') {
+            const label = `${data.algorithm} (${data.size})`;
+            updateChart(label, data.execution_time_ms);
+        }
     } catch (error) {
         console.error('Error fetching benchmark:', error);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Run Benchmark';
     }
 }
