@@ -20,12 +20,15 @@ function initChart() {
             datasets: [{
                 label: 'Execution Time (ms)',
                 data: [],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
+                backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -78,11 +81,14 @@ async function handleFormSubmit(event) {
         
         const data = await response.json();
         if (data.status === 'success') {
-            const label = `${data.algorithm} (${data.size})`;
+            const label = `${algorithm.replace('_', ' ')} (n=${data.size})`;
             updateChart(label, data.execution_time_ms);
+        } else {
+            alert('Failed to run benchmark');
         }
     } catch (error) {
         console.error('Error fetching benchmark:', error);
+        alert('An error occurred during benchmark execution.');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Run Benchmark';
