@@ -1,2 +1,12 @@
-# app.py
-# Main application entry point for the Flask backend
+from flask import Flask, render_template, request, jsonify
+import time
+import random
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
