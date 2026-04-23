@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
+
+    const clearBtn = document.getElementById('clear-chart');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            benchmarkChart.data.labels = [];
+            benchmarkChart.data.datasets[0].data = [];
+            benchmarkChart.update();
+        });
+    }
     
     initChart();
 });
@@ -60,11 +69,15 @@ async function handleFormSubmit(event) {
     const form = event.target;
     const algorithm = form.elements['algorithm'].value;
     const dataSize = parseInt(form.elements['data-size'].value, 10);
+    const dataType = form.elements['data-type'].value;
+    const iterations = parseInt(form.elements['iterations'].value, 10);
     const btn = form.querySelector('button[type="submit"]');
     
     const payload = {
         algorithm: algorithm,
-        data_size: dataSize
+        data_size: dataSize,
+        data_type: dataType,
+        iterations: iterations
     };
     
     btn.disabled = true;
@@ -81,7 +94,7 @@ async function handleFormSubmit(event) {
         
         const data = await response.json();
         if (data.status === 'success') {
-            const label = `${algorithm.replace('_', ' ')} (n=${data.size})`;
+            const label = `${algorithm.replace('_', ' ')} (${dataType.charAt(0)}, n=${data.size})`;
             updateChart(label, data.execution_time_ms);
         } else {
             alert('Failed to run benchmark');
