@@ -37,6 +37,15 @@ def merge_sort(arr):
             j += 1
             k += 1
 
+def quick_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quick_sort(left) + middle + quick_sort(right)
+
 def linear_search(arr, target):
     for i in range(len(arr)):
         if arr[i] == target:
@@ -75,6 +84,8 @@ def benchmark():
         bubble_sort(test_data)
     elif alg == 'merge_sort':
         merge_sort(test_data)
+    elif alg == 'quick_sort':
+        quick_sort(test_data)
     elif alg == 'linear_search':
         linear_search(test_data, target)
     elif alg == 'binary_search':
