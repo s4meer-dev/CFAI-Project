@@ -115,37 +115,58 @@ def index():
 def benchmark():
     data = request.json
     alg = data.get('algorithm')
-    size = data.get('data_size')
+    size = data.get('data_size', 1000)
+    data_type = data.get('data_type', 'random')
+    iterations = data.get('iterations', 1)
     
-    test_data = [random.randint(1, 10000) for _ in range(size)]
-    target = test_data[-1] if test_data else -1
+    total_time = 0
     
-    start_time = time.time()
-    
-    if alg == 'bubble_sort':
-        bubble_sort(test_data)
-    elif alg == 'selection_sort':
-        selection_sort(test_data)
-    elif alg == 'insertion_sort':
-        insertion_sort(test_data)
-    elif alg == 'merge_sort':
-        merge_sort(test_data)
-    elif alg == 'quick_sort':
-        quick_sort(test_data)
-    elif alg == 'linear_search':
-        linear_search(test_data, target)
-    elif alg == 'binary_search':
-        test_data.sort() # Ensure sorted array for binary search
-        start_time = time.time() # Reset clock after sorting
-        binary_search(test_data, target)
-    elif alg == 'jump_search':
-        test_data.sort() # Ensure sorted array
-        start_time = time.time()
-        jump_search(test_data, target)
+    for _ in range(iterations):
+        # Generate data based on type
+        if data_type == 'sorted':
+            test_data = list(range(size))
+        elif data_type == 'reversed':
+            test_data = list(range(size, 0, -1))
+        else: # random
+            test_data = [random.randint(1, 10000) for _ in range(size)]
+            
+        target = test_data[-1] if test_data else -1
         
-    execution_time = (time.time() - start_time) * 1000 # Convert to ms
+        start_time = time.time()
+        
+        if alg == 'bubble_sort':
+            bubble_sort(test_data)
+        elif alg == 'selection_sort':
+            selection_sort(test_data)
+        elif alg == 'insertion_sort':
+            insertion_sort(test_data)
+        elif alg == 'merge_sort':
+            merge_sort(test_data)
+        elif alg == 'quick_sort':
+            quick_sort(test_data)
+        elif alg == 'linear_search':
+            linear_search(test_data, target)
+        elif alg == 'binary_search':
+            if data_type == 'random': test_data.sort()
+            start_time = time.time()
+            binary_search(test_data, target)
+        elif alg == 'jump_search':
+            if data_type == 'random': test_data.sort()
+            start_time = time.time()
+            jump_search(test_data, target)
+            
+        total_time += (time.time() - start_time) * 1000
+        
+    avg_execution_time = total_time / iterations
     
-    return jsonify({"status": "success", "algorithm": alg, "size": size, "execution_time_ms": execution_time})
+    return jsonify({
+        "status": "success", 
+        "algorithm": alg, 
+        "size": size, 
+        "data_type": data_type,
+        "iterations": iterations,
+        "execution_time_ms": avg_execution_time
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
