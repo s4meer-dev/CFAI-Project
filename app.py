@@ -12,6 +12,28 @@ def bubble_sort(arr):
                 arr[j], arr[j+1] = arr[j+1], arr[j]
     return arr
 
+    return arr
+
+def selection_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        min_idx = i
+        for j in range(i+1, n):
+            if arr[min_idx] > arr[j]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr
+
+def insertion_sort(arr):
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i-1
+        while j >= 0 and key < arr[j]:
+            arr[j+1] = arr[j]
+            j -= 1
+        arr[j+1] = key
+    return arr
+
 def merge_sort(arr):
     if len(arr) > 1:
         mid = len(arr)//2
@@ -82,6 +104,10 @@ def benchmark():
     
     if alg == 'bubble_sort':
         bubble_sort(test_data)
+    elif alg == 'selection_sort':
+        selection_sort(test_data)
+    elif alg == 'insertion_sort':
+        insertion_sort(test_data)
     elif alg == 'merge_sort':
         merge_sort(test_data)
     elif alg == 'quick_sort':
