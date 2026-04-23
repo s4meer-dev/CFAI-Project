@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import time
 import random
+import math
 
 app = Flask(__name__)
 
@@ -74,6 +75,25 @@ def linear_search(arr, target):
             return i
     return -1
 
+    return -1
+
+def jump_search(arr, target):
+    n = len(arr)
+    step = int(math.sqrt(n))
+    prev = 0
+    while arr[min(step, n)-1] < target:
+        prev = step
+        step += int(math.sqrt(n))
+        if prev >= n:
+            return -1
+    while arr[prev] < target:
+        prev += 1
+        if prev == min(step, n):
+            return -1
+    if arr[prev] == target:
+        return prev
+    return -1
+
 def binary_search(arr, target):
     low = 0
     high = len(arr) - 1
@@ -118,6 +138,10 @@ def benchmark():
         test_data.sort() # Ensure sorted array for binary search
         start_time = time.time() # Reset clock after sorting
         binary_search(test_data, target)
+    elif alg == 'jump_search':
+        test_data.sort() # Ensure sorted array
+        start_time = time.time()
+        jump_search(test_data, target)
         
     execution_time = (time.time() - start_time) * 1000 # Convert to ms
     
