@@ -6,9 +6,13 @@ A web-based tool to visualize and compare the execution time and time complexity
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python
 
-## Project Plan
-- Setup and basic UI
-- Implement sorting algorithms (Bubble Sort, Merge Sort)
-- Implement search algorithms (Linear Search, Binary Search)
-- Compare Data Structures (List vs. Set)
-- Visualize results with Chart.js
+## Project Progress
+- **Day 1:** Initial setup and project structure.
+- **Day 2:** Implemented Bubble Sort and Merge Sort.
+- **Day 3:** Implemented Linear and Binary Search with visualization.
+- **Day 4:** Expanded algorithm suite (Quick, Selection, Insertion, Jump) and added detailed measurement controls (Iterations, Data States).
+
+## Future Work
+- Space complexity analysis.
+- Export results to CSV.
+- User authentication for saving benchmarks.
