@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import time
 import random
 import math
+import tracemalloc
 
 app = Flask(__name__)
 
@@ -11,8 +12,6 @@ def bubble_sort(arr):
         for j in range(0, n-i-1):
             if arr[j] > arr[j+1]:
                 arr[j], arr[j+1] = arr[j+1], arr[j]
-    return arr
-
     return arr
 
 def selection_sort(arr):
@@ -75,8 +74,6 @@ def linear_search(arr, target):
             return i
     return -1
 
-    return -1
-
 def jump_search(arr, target):
     n = len(arr)
     step = int(math.sqrt(n))
@@ -120,6 +117,7 @@ def benchmark():
     iterations = data.get('iterations', 1)
     
     total_time = 0
+    total_memory = 0
     
     for _ in range(iterations):
         # Generate data based on type
@@ -132,6 +130,7 @@ def benchmark():
             
         target = test_data[-1] if test_data else -1
         
+        tracemalloc.start()
         start_time = time.time()
         
         if alg == 'bubble_sort':
@@ -155,9 +154,15 @@ def benchmark():
             start_time = time.time()
             jump_search(test_data, target)
             
-        total_time += (time.time() - start_time) * 1000
+        execution_time = (time.time() - start_time) * 1000
+        current_mem, peak_mem = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        
+        total_time += execution_time
+        total_memory += peak_mem
         
     avg_execution_time = total_time / iterations
+    avg_memory_usage = total_memory / iterations
     
     return jsonify({
         "status": "success", 
@@ -165,7 +170,8 @@ def benchmark():
         "size": size, 
         "data_type": data_type,
         "iterations": iterations,
-        "execution_time_ms": avg_execution_time
+        "execution_time_ms": avg_execution_time,
+        "memory_usage_bytes": avg_memory_usage
     })
 
 if __name__ == '__main__':
