@@ -55,8 +55,28 @@
                     <div class="button-group">
                         <button type="submit" class="btn-primary">Run Benchmark</button>
                         <button type="button" id="clear-chart" class="btn-secondary">Clear Chart</button>
+                        <button type="button" id="export-csv" class="btn-secondary">Export to CSV</button>
                     </div>
                 </form>
+            </div>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <h2>Benchmark History</h2>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table id="history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <th style="padding: 0.5rem;">Algorithm</th>
+                                <th style="padding: 0.5rem;">Size</th>
+                                <th style="padding: 0.5rem;">Time (ms)</th>
+                                <th style="padding: 0.5rem;">Memory (B)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- History rows will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
         
