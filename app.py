@@ -19,6 +19,10 @@ def bubble_sort(arr):
     return arr
 
 def selection_sort(arr):
+    """
+    Sorts an array using the Selection Sort algorithm.
+    Time Complexity: O(n^2), Space Complexity: O(1)
+    """
     n = len(arr)
     for i in range(n):
         min_idx = i
