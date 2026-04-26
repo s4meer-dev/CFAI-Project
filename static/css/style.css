@@ -130,3 +130,25 @@ header h1 {
         grid-template-columns: 1fr;
     }
 }
+
+/* Table Styles */
+.table-container {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+#history-table th {
+    background-color: var(--secondary-bg);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+#history-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+#history-table tr:hover {
+    background-color: rgba(0, 255, 204, 0.1);
+}
