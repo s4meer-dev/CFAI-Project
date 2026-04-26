@@ -14,7 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
             benchmarkChart.data.labels = [];
             benchmarkChart.data.datasets[0].data = [];
             benchmarkChart.update();
+            const tbody = document.querySelector('#history-table tbody');
+            if (tbody) tbody.innerHTML = '';
         });
+    }
+
+    const exportBtn = document.getElementById('export-csv');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportTableToCSV);
     }
     
     initChart();
@@ -63,6 +70,58 @@ function updateChart(label, time) {
     benchmarkChart.update();
 }
 
+function addHistoryRow(data) {
+    const tbody = document.querySelector('#history-table tbody');
+    if (!tbody) return;
+    
+    const row = document.createElement('tr');
+    row.style.borderBottom = '1px solid var(--border-color)';
+    
+    const memBytes = data.memory_usage_bytes || 0;
+    
+    row.innerHTML = `
+        <td style="padding: 0.5rem;">${data.algorithm.replace('_', ' ')}</td>
+        <td style="padding: 0.5rem;">${data.size} (${data.data_type})</td>
+        <td style="padding: 0.5rem;">${data.execution_time_ms.toFixed(4)}</td>
+        <td style="padding: 0.5rem;">${memBytes.toFixed(2)}</td>
+    `;
+    
+    tbody.prepend(row);
+}
+
+function exportTableToCSV() {
+    const table = document.getElementById('history-table');
+    if (!table) return;
+    
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length; j++) {
+            row.push('"' + cols[j].innerText + '"');
+        }
+        csv.push(row.join(','));
+    }
+    
+    downloadCSV(csv.join('\\n'), 'benchmark_history.csv');
+}
+
+function downloadCSV(csv, filename) {
+    let csvFile;
+    let downloadLink;
+
+    csvFile = new Blob([csv], {type: "text/csv"});
+    downloadLink = document.createElement("a");
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
 async function handleFormSubmit(event) {
     event.preventDefault();
     
@@ -96,6 +155,7 @@ async function handleFormSubmit(event) {
         if (data.status === 'success') {
             const label = `${algorithm.replace('_', ' ')} (${dataType.charAt(0)}, n=${data.size})`;
             updateChart(label, data.execution_time_ms);
+            addHistoryRow(data);
         } else {
             alert('Failed to run benchmark');
         }
