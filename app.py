@@ -7,6 +7,10 @@ import tracemalloc
 app = Flask(__name__)
 
 def bubble_sort(arr):
+    """
+    Sorts an array using the Bubble Sort algorithm.
+    Time Complexity: O(n^2), Space Complexity: O(1)
+    """
     n = len(arr)
     for i in range(n):
         for j in range(0, n-i-1):
