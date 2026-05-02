@@ -33,6 +33,11 @@ def selection_sort(arr):
     return arr
 
 def insertion_sort(arr):
+    """
+    Sorts an array using the Insertion Sort algorithm.
+    Time Complexity: O(n^2), Space Complexity: O(1)
+    Building the final sorted array one item at a time.
+    """
     for i in range(1, len(arr)):
         key = arr[i]
         j = i-1
@@ -43,6 +48,11 @@ def insertion_sort(arr):
     return arr
 
 def merge_sort(arr):
+    """
+    Sorts an array using the Merge Sort algorithm.
+    Time Complexity: O(n log n), Space Complexity: O(n)
+    Divide and conquer strategy with merging.
+    """
     if len(arr) > 1:
         mid = len(arr)//2
         L = arr[:mid]
@@ -68,6 +78,12 @@ def merge_sort(arr):
             k += 1
 
 def quick_sort(arr):
+    """
+    Sorts an array using the Quick Sort algorithm.
+    Time Complexity: O(n log n) average, O(n^2) worst case.
+    Space Complexity: O(log n)
+    Partition-based divide and conquer.
+    """
     if len(arr) <= 1:
         return arr
     pivot = arr[len(arr) // 2]
