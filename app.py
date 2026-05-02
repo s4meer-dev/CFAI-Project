@@ -235,6 +235,17 @@ def exponential_search(arr, target):
             return mid
     return -1
 
+def generate_test_data(size, data_type):
+    """
+    Generates test data based on size and type.
+    """
+    if data_type == 'sorted':
+        return list(range(size))
+    elif data_type == 'reversed':
+        return list(range(size, 0, -1))
+    else: # random
+        return [random.randint(1, 10000) for _ in range(size)]
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -251,14 +262,7 @@ def benchmark():
     total_memory = 0
     
     for _ in range(iterations):
-        # Generate data based on type
-        if data_type == 'sorted':
-            test_data = list(range(size))
-        elif data_type == 'reversed':
-            test_data = list(range(size, 0, -1))
-        else: # random
-            test_data = [random.randint(1, 10000) for _ in range(size)]
-            
+        test_data = generate_test_data(size, data_type)
         target = test_data[-1] if test_data else -1
         
         tracemalloc.start()
