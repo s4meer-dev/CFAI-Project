@@ -243,6 +243,12 @@ def benchmark():
             merge_sort(test_data)
         elif alg == 'quick_sort':
             quick_sort(test_data)
+        elif alg == 'heap_sort':
+            heap_sort(test_data)
+        elif alg == 'shell_sort':
+            shell_sort(test_data)
+        elif alg == 'counting_sort':
+            counting_sort(test_data)
         elif alg == 'linear_search':
             linear_search(test_data, target)
         elif alg == 'binary_search':
@@ -253,6 +259,10 @@ def benchmark():
             if data_type == 'random': test_data.sort()
             start_time = time.time()
             jump_search(test_data, target)
+        elif alg == 'exponential_search':
+            if data_type == 'random': test_data.sort()
+            start_time = time.time()
+            exponential_search(test_data, target)
             
         execution_time = (time.time() - start_time) * 1000
         current_mem, peak_mem = tracemalloc.get_traced_memory()
