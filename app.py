@@ -177,6 +177,33 @@ def binary_search(arr, target):
             return mid
     return -1
 
+def exponential_search(arr, target):
+    """
+    Finds target in a sorted array using Exponential Search.
+    Time Complexity: O(log i) where i is the position of target.
+    """
+    if not arr:
+        return -1
+    if arr[0] == target:
+        return 0
+    n = len(arr)
+    i = 1
+    while i < n and arr[i] <= target:
+        i = i * 2
+    
+    # Binary search in range [i/2, min(i, n-1)]
+    low = i // 2
+    high = min(i, n - 1)
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] < target:
+            low = mid + 1
+        elif arr[mid] > target:
+            high = mid - 1
+        else:
+            return mid
+    return -1
+
 @app.route('/')
 def index():
     return render_template('index.html')
