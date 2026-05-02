@@ -142,12 +142,22 @@ def counting_sort(arr):
     return arr
 
 def linear_search(arr, target):
+    """
+    Finds target in an array using Linear Search.
+    Time Complexity: O(n), Space Complexity: O(1)
+    Scanning each element one by one.
+    """
     for i in range(len(arr)):
         if arr[i] == target:
             return i
     return -1
 
 def jump_search(arr, target):
+    """
+    Finds target in a sorted array using Jump Search.
+    Time Complexity: O(sqrt(n)), Space Complexity: O(1)
+    Jumps through the array in fixed steps.
+    """
     n = len(arr)
     step = int(math.sqrt(n))
     prev = 0
@@ -165,6 +175,11 @@ def jump_search(arr, target):
     return -1
 
 def binary_search(arr, target):
+    """
+    Finds target in a sorted array using Binary Search.
+    Time Complexity: O(log n), Space Complexity: O(1)
+    Repeatedly dividing the search interval in half.
+    """
     low = 0
     high = len(arr) - 1
     while low <= high:
