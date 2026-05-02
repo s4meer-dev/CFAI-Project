@@ -119,6 +119,28 @@ def shell_sort(arr):
         gap //= 2
     return arr
 
+def counting_sort(arr):
+    """
+    Sorts an array using the Counting Sort algorithm.
+    Time Complexity: O(n + k), Space Complexity: O(k) where k is the range of input.
+    Note: Only works for non-negative integers.
+    """
+    if not arr:
+        return arr
+    max_val = max(arr)
+    count = [0] * (max_val + 1)
+    for x in arr:
+        count[x] += 1
+    for i in range(1, len(count)):
+        count[i] += count[i-1]
+    output = [0] * len(arr)
+    for i in range(len(arr)-1, -1, -1):
+        output[count[arr[i]]-1] = arr[i]
+        count[arr[i]] -= 1
+    for i in range(len(arr)):
+        arr[i] = output[i]
+    return arr
+
 def linear_search(arr, target):
     for i in range(len(arr)):
         if arr[i] == target:
