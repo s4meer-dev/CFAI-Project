@@ -253,10 +253,21 @@ def index():
 @app.route('/api/benchmark', methods=['POST'])
 def benchmark():
     data = request.json
+    if not data:
+        return jsonify({"status": "error", "message": "No input data provided"}), 400
+        
     alg = data.get('algorithm')
+    if not alg:
+        return jsonify({"status": "error", "message": "No algorithm specified"}), 400
+        
     size = data.get('data_size', 1000)
+    if not isinstance(size, int) or size <= 0:
+        return jsonify({"status": "error", "message": "Invalid data size"}), 400
+        
     data_type = data.get('data_type', 'random')
     iterations = data.get('iterations', 1)
+    if not isinstance(iterations, int) or iterations <= 0:
+        return jsonify({"status": "error", "message": "Invalid iterations"}), 400
     
     total_time = 0
     total_memory = 0
