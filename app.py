@@ -101,6 +101,24 @@ def heap_sort(arr):
         heapify(arr, i, 0)
     return arr
 
+def shell_sort(arr):
+    """
+    Sorts an array using the Shell Sort algorithm.
+    Time Complexity: O(n log n) to O(n^2) depending on gap, Space Complexity: O(1)
+    """
+    n = len(arr)
+    gap = n // 2
+    while gap > 0:
+        for i in range(gap, n):
+            temp = arr[i]
+            j = i
+            while j >= gap and arr[j - gap] > temp:
+                arr[j] = arr[j - gap]
+                j -= gap
+            arr[j] = temp
+        gap //= 2
+    return arr
+
 def linear_search(arr, target):
     for i in range(len(arr)):
         if arr[i] == target:
