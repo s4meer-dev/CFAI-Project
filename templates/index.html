@@ -122,6 +122,22 @@
 
         <section id="visualizer-section" class="card" style="grid-column: 1 / -1;">
             <h2>Interactive Sort Visualizer</h2>
+            <div class="visualizer-config">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="viz-algorithm">Algorithm</label>
+                    <select id="viz-algorithm">
+                        <option value="bubble_sort">Bubble Sort</option>
+                        <option value="selection_sort">Selection Sort</option>
+                        <option value="insertion_sort">Insertion Sort</option>
+                        <option value="merge_sort">Merge Sort</option>
+                        <option value="quick_sort">Quick Sort</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="viz-speed">Speed</label>
+                    <input type="range" id="viz-speed" min="1" max="100" value="50">
+                </div>
+            </div>
             <canvas id="sortCanvas" height="300"></canvas>
             <div class="visualizer-controls">
                 <button id="viz-generate" class="btn-secondary">⚡ Generate Array</button>
