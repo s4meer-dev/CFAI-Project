@@ -65,6 +65,23 @@ class Visualizer {
         }
         this.sortedIndices.add(0);
     }
+
+    *selectionSortSteps(arr) {
+        const n = arr.length;
+        for (let i = 0; i < n - 1; i++) {
+            let minIdx = i;
+            for (let j = i + 1; j < n; j++) {
+                yield { indices: [minIdx, j], action: 'compare' };
+                if (arr[j] < arr[minIdx]) minIdx = j;
+            }
+            if (minIdx !== i) {
+                yield { indices: [i, minIdx], action: 'swap' };
+                [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+            }
+            this.sortedIndices.add(i);
+        }
+        this.sortedIndices.add(n - 1);
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
