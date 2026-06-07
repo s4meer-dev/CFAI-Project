@@ -109,6 +109,12 @@ function updateChart(label, time) {
     benchmarkChart.update();
 }
 
+function updateMemoryChart(label, memory) {
+    memoryChart.data.labels.push(label);
+    memoryChart.data.datasets[0].data.push(memory);
+    memoryChart.update();
+}
+
 function addHistoryRow(data) {
     const tbody = document.querySelector('#history-table tbody');
     if (!tbody) return;
@@ -194,6 +200,7 @@ async function handleFormSubmit(event) {
         if (data.status === 'success') {
             const label = `${algorithm.replace('_', ' ')} (${dataType.charAt(0)}, n=${data.size})`;
             updateChart(label, data.execution_time_ms);
+            updateMemoryChart(label, data.memory_usage_bytes);
             addHistoryRow(data);
         } else {
             alert('Failed to run benchmark');
