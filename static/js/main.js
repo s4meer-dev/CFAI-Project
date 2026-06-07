@@ -32,14 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const algorithmSelect = document.getElementById('algorithm');
     let complexityData = {};
 
-    fetch('/api/complexity')
-        .then(res => res.json())
-        .then(data => {
-            complexityData = data;
-            updateComplexityBadges(algorithmSelect.value, complexityData);
-        });
-
     if (algorithmSelect) {
+        fetch('/api/complexity')
+            .then(res => res.json())
+            .then(data => {
+                complexityData = data;
+                updateComplexityBadges(algorithmSelect.value, complexityData);
+            });
+
         algorithmSelect.addEventListener('change', () => {
             updateComplexityBadges(algorithmSelect.value, complexityData);
         });
@@ -153,7 +153,7 @@ function addHistoryRow(data) {
     const memBytes = data.memory_usage_bytes || 0;
     
     row.innerHTML = `
-        <td style="padding: 0.5rem;">${data.algorithm.replace('_', ' ')}</td>
+        <td style="padding: 0.5rem;">${data.algorithm.replaceAll('_', ' ')}</td>
         <td style="padding: 0.5rem;">${data.size} (${data.data_type})</td>
         <td style="padding: 0.5rem;">${data.execution_time_ms.toFixed(4)}</td>
         <td style="padding: 0.5rem;">${memBytes.toFixed(2)}</td>
@@ -178,7 +178,7 @@ function exportTableToCSV() {
         csv.push(row.join(','));
     }
     
-    downloadCSV(csv.join('\\n'), 'benchmark_history.csv');
+    downloadCSV(csv.join('\n'), 'benchmark_history.csv');
 }
 
 function downloadCSV(csv, filename) {
@@ -226,7 +226,7 @@ async function handleFormSubmit(event) {
         
         const data = await response.json();
         if (data.status === 'success') {
-            const label = `${algorithm.replace('_', ' ')} (${dataType.charAt(0)}, n=${data.size})`;
+            const label = `${algorithm.replaceAll('_', ' ')} (${dataType.charAt(0)}, n=${data.size})`;
             updateChart(label, data.execution_time_ms);
             updateMemoryChart(label, data.memory_usage_bytes);
             addHistoryRow(data);
