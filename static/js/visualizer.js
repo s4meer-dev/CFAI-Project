@@ -126,6 +126,34 @@ class Visualizer {
         }
         for (let i = 0; i < n; i++) this.sortedIndices.add(i);
     }
+
+    *quickSortSteps(arr) {
+        const stack = [[0, arr.length - 1]];
+        while (stack.length) {
+            const [lo, hi] = stack.pop();
+            if (lo >= hi) {
+                if (lo === hi) this.sortedIndices.add(lo);
+                continue;
+            }
+            // Lomuto partition
+            const pivot = arr[hi];
+            let i = lo - 1;
+            for (let j = lo; j < hi; j++) {
+                yield { indices: [j, hi], action: 'compare' };
+                if (arr[j] <= pivot) {
+                    i++;
+                    yield { indices: [i, j], action: 'swap' };
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+            }
+            yield { indices: [i + 1, hi], action: 'swap' };
+            [arr[i + 1], arr[hi]] = [arr[hi], arr[i + 1]];
+            const p = i + 1;
+            this.sortedIndices.add(p);
+            stack.push([lo, p - 1]);
+            stack.push([p + 1, hi]);
+        }
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
