@@ -21,6 +21,8 @@ COMPLEXITY_MAP = {
     'exponential_search':{'time': 'O(log i)',    'space': 'O(1)'},
 }
 
+VALID_ALGORITHMS = set(COMPLEXITY_MAP.keys())
+
 def bubble_sort(arr):
     """
     Sorts an array using the Bubble Sort algorithm.
@@ -276,24 +278,25 @@ def benchmark():
         return jsonify({"status": "error", "message": "No input data provided"}), 400
         
     alg = data.get('algorithm')
-    if not alg:
-        return jsonify({"status": "error", "message": "No algorithm specified"}), 400
+    if not alg or alg not in VALID_ALGORITHMS:
+        return jsonify({"status": "error", "message": f"Unknown algorithm: '{alg}'"}), 400
         
     size = data.get('data_size', 1000)
-    if not isinstance(size, int) or size <= 0:
-        return jsonify({"status": "error", "message": "Invalid data size"}), 400
+    if not isinstance(size, int) or size <= 0 or size > 100000:
+        return jsonify({"status": "error", "message": "data_size must be an integer between 1 and 100000"}), 400
         
     data_type = data.get('data_type', 'random')
     iterations = data.get('iterations', 1)
-    if not isinstance(iterations, int) or iterations <= 0:
-        return jsonify({"status": "error", "message": "Invalid iterations"}), 400
+    if not isinstance(iterations, int) or iterations <= 0 or iterations > 50:
+        return jsonify({"status": "error", "message": "iterations must be an integer between 1 and 50"}), 400
     
     total_time = 0
     total_memory = 0
     
     for _ in range(iterations):
         test_data = generate_test_data(size, data_type)
-        target = test_data[-1] if test_data else -1
+        # Pick a random element as the search target for a realistic benchmark
+        target = random.choice(test_data) if test_data else -1
         
         tracemalloc.start()
         start_time = time.time()
