@@ -83,6 +83,10 @@ function setupEventListeners() {
     // Playback
     document.getElementById('btn-play').addEventListener('click', play);
     document.getElementById('btn-pause').addEventListener('click', pause);
+    document.getElementById('btn-prev').addEventListener('click', () => {
+        pause();
+        stepBothBack();
+    });
     document.getElementById('btn-step').addEventListener('click', () => {
         pause();
         stepBoth();
@@ -154,6 +158,18 @@ function pause() {
 function stepBoth() {
     const steppedA = vizA.step();
     const steppedB = vizB.step();
+    
+    document.getElementById('ops-a').textContent = vizA.opsCount;
+    document.getElementById('ops-b').textContent = vizB.opsCount;
+    document.getElementById('sorted-a').textContent = vizA.sortedIndices.size;
+    document.getElementById('sorted-b').textContent = vizB.sortedIndices.size;
+    
+    return steppedA || steppedB;
+}
+
+function stepBothBack() {
+    const steppedA = vizA.stepBack();
+    const steppedB = vizB.stepBack();
     
     document.getElementById('ops-a').textContent = vizA.opsCount;
     document.getElementById('ops-b').textContent = vizB.opsCount;
