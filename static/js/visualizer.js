@@ -161,10 +161,42 @@ class Visualizer {
             stack.push([p + 1, hi]);
         }
     }
+
+    step() {
+        if (!this.generator) {
+            const algo = document.getElementById('viz-algorithm')?.value || 'bubble_sort';
+            switch (algo) {
+                case 'bubble_sort':    this.generator = this.bubbleSortSteps(this.array);    break;
+                case 'selection_sort': this.generator = this.selectionSortSteps(this.array); break;
+                case 'insertion_sort': this.generator = this.insertionSortSteps(this.array); break;
+                case 'merge_sort':     this.generator = this.mergeSortSteps(this.array);     break;
+                case 'quick_sort':     this.generator = this.quickSortSteps(this.array);     break;
+                default:               this.generator = this.bubbleSortSteps(this.array);
+            }
+        }
+
+        const result = this.generator.next();
+        if (!result.done) {
+            const { indices, action } = result.value;
+            const highlights = {};
+            indices.forEach(idx => { highlights[idx] = action; });
+            this.draw(highlights);
+        } else {
+            // Sort complete — mark all as sorted and stop
+            this.array.forEach((_, i) => this.sortedIndices.add(i));
+            this.draw();
+            this.pause();
+            this.generator = null;
+        }
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
 
 document.getElementById('viz-generate')?.addEventListener('click', () => {
     visualizer.generateArray();
+});
+
+document.getElementById('viz-step')?.addEventListener('click', () => {
+    visualizer.step();
 });
