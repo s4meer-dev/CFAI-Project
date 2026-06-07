@@ -85,14 +85,21 @@ class Visualizer {
             case 'insertion_sort':
                 markSorted(0);
                 for (let i = 1; i < n; i++) {
-                    let j = i;
-                    while (j > 0) {
-                        compare(j - 1, j);
-                        if (arr[j] < arr[j - 1]) {
-                            swap(j - 1, j);
+                    let key = arr[i];
+                    let j = i - 1;
+                    let hole = i;
+                    
+                    while (j >= 0) {
+                        compare(j, hole);
+                        if (arr[j] > key) {
+                            overwrite(hole, arr[j]);
+                            hole = j;
                             j--;
-                        } else break;
+                        } else {
+                            break;
+                        }
                     }
+                    overwrite(hole, key);
                     markSorted(i);
                 }
                 break;
@@ -184,16 +191,21 @@ class Visualizer {
             case 'shell_sort':
                 for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
                     for (let i = gap; i < n; i++) {
+                        let temp = arr[i];
                         let j = i;
+                        let hole = i;
+                        
                         while (j >= gap) {
-                            compare(j - gap, j);
-                            if (arr[j - gap] > arr[j]) {
-                                swap(j, j - gap);
+                            compare(j - gap, hole);
+                            if (arr[j - gap] > temp) {
+                                overwrite(hole, arr[j - gap]);
+                                hole = j - gap;
                                 j -= gap;
                             } else {
                                 break;
                             }
                         }
+                        overwrite(hole, temp);
                     }
                 }
                 for (let i = 0; i < n; i++) markSorted(i);
