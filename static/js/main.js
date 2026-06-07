@@ -1,5 +1,6 @@
 // static/js/main.js
 let benchmarkChart;
+let memoryChart;
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('benchmark-form');
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     initChart();
+    initMemoryChart();
 });
 
 function initChart() {
@@ -51,6 +53,43 @@ function initChart() {
                     title: {
                         display: true,
                         text: 'Time (ms)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Algorithm Config'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function initMemoryChart() {
+    const ctx = document.getElementById('memoryChart').getContext('2d');
+    memoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Peak Memory (bytes)',
+                data: [],
+                backgroundColor: 'rgba(251, 146, 60, 0.7)',
+                borderColor: 'rgba(251, 146, 60, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Memory (bytes)'
                     }
                 },
                 x: {
