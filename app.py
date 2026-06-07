@@ -6,6 +6,21 @@ import tracemalloc
 
 app = Flask(__name__)
 
+COMPLEXITY_MAP = {
+    'bubble_sort':       {'time': 'O(n\u00b2)',       'space': 'O(1)'},
+    'selection_sort':    {'time': 'O(n\u00b2)',       'space': 'O(1)'},
+    'insertion_sort':    {'time': 'O(n\u00b2)',       'space': 'O(1)'},
+    'merge_sort':        {'time': 'O(n log n)',  'space': 'O(n)'},
+    'quick_sort':        {'time': 'O(n log n)',  'space': 'O(log n)'},
+    'heap_sort':         {'time': 'O(n log n)',  'space': 'O(1)'},
+    'shell_sort':        {'time': 'O(n log n)',  'space': 'O(1)'},
+    'counting_sort':     {'time': 'O(n + k)',    'space': 'O(k)'},
+    'linear_search':     {'time': 'O(n)',        'space': 'O(1)'},
+    'binary_search':     {'time': 'O(log n)',    'space': 'O(1)'},
+    'jump_search':       {'time': 'O(\u221an)',  'space': 'O(1)'},
+    'exponential_search':{'time': 'O(log i)',    'space': 'O(1)'},
+}
+
 def bubble_sort(arr):
     """
     Sorts an array using the Bubble Sort algorithm.
@@ -320,6 +335,7 @@ def benchmark():
     avg_execution_time = total_time / iterations
     avg_memory_usage = total_memory / iterations
     
+    complexity = COMPLEXITY_MAP.get(alg, {})
     return jsonify({
         "status": "success", 
         "algorithm": alg, 
@@ -327,7 +343,9 @@ def benchmark():
         "data_type": data_type,
         "iterations": iterations,
         "execution_time_ms": avg_execution_time,
-        "memory_usage_bytes": avg_memory_usage
+        "memory_usage_bytes": avg_memory_usage,
+        "time_complexity": complexity.get('time', 'N/A'),
+        "space_complexity": complexity.get('space', 'N/A')
     })
 
 if __name__ == '__main__':
