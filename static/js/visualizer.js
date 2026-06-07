@@ -1,21 +1,39 @@
-// static/js/visualizer.js
-
 class Visualizer {
-    constructor(canvasId) {
+    constructor(canvasId, color) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+        this.color = color;
         this.array = [];
         this.generator = null;
-        this.intervalId = null;
-        this.speed = 50;
         this.sortedIndices = new Set();
+        this.opsCount = 0;
+        this.isComplete = false;
+        this.currentAlgo = 'bubble_sort';
+    }
+
+    setArray(arr) {
+        this.array = [...arr];
+        this.generator = null;
+        this.sortedIndices = new Set();
+        this.opsCount = 0;
+        this.isComplete = false;
+        if (this.canvas.offsetWidth > 0) this.canvas.width = this.canvas.offsetWidth;
+        this.draw();
+    }
+
+    setAlgorithm(algo) {
+        this.currentAlgo = algo;
+        this.generator = null;
+        this.sortedIndices = new Set();
+        this.opsCount = 0;
+        this.isComplete = false;
+        this.draw();
     }
 
     draw(highlights = {}) {
-        const { canvas, ctx, array, sortedIndices } = this;
+        const { canvas, ctx, array, sortedIndices, color } = this;
         if (!ctx) return;
 
-        // Sync canvas pixel width to its rendered CSS width
         if (canvas.offsetWidth > 0 && canvas.width !== canvas.offsetWidth) {
             canvas.width = canvas.offsetWidth;
         }
@@ -24,53 +42,79 @@ class Visualizer {
         if (array.length === 0) return;
 
         const barWidth = canvas.width / array.length;
-        const maxVal = Math.max(...array);
+        const maxVal = Math.max(...array, 1);
 
         array.forEach((val, i) => {
             const barHeight = (val / maxVal) * (canvas.height - 10);
+            
+            let fillColor = color;
+            if (sortedIndices.has(i)) fillColor = '#22c55e'; // green (sorted)
+            if (highlights[i] === 'compare') fillColor = '#facc15'; // yellow
+            if (highlights[i] === 'swap') fillColor = '#ef4444'; // red
 
-            // Priority: swap > compare > sorted > default
-            let color = '#00ffcc';                        // default teal
-            if (sortedIndices.has(i)) color = '#22c55e'; // green  — sorted
-            if (highlights[i] === 'compare') color = '#facc15'; // yellow
-            if (highlights[i] === 'swap')    color = '#ef4444'; // red
-
-            ctx.fillStyle = color;
-            ctx.fillRect(
+            ctx.fillStyle = fillColor;
+            
+            ctx.beginPath();
+            ctx.roundRect(
                 i * barWidth + 1,
                 canvas.height - barHeight,
                 barWidth - 2,
-                barHeight
+                barHeight,
+                [4, 4, 0, 0]
             );
+            ctx.fill();
         });
     }
 
-    generateArray(size = 60) {
-        if (this.intervalId) clearInterval(this.intervalId);
-        this.intervalId = null;
-        this.generator = null;
-        this.sortedIndices = new Set();
-        if (this.canvas.offsetWidth > 0) this.canvas.width = this.canvas.offsetWidth;
-        this.array = Array.from(
-            { length: size },
-            () => Math.floor(Math.random() * (this.canvas.height - 20)) + 10
-        );
-        this.draw();
+    step() {
+        if (this.isComplete) return false;
+
+        if (!this.generator) {
+            switch (this.currentAlgo) {
+                case 'bubble_sort':    this.generator = this.bubbleSortSteps([...this.array]); break;
+                case 'selection_sort': this.generator = this.selectionSortSteps([...this.array]); break;
+                case 'insertion_sort': this.generator = this.insertionSortSteps([...this.array]); break;
+                case 'merge_sort':     this.generator = this.mergeSortSteps([...this.array]); break;
+                case 'quick_sort':     this.generator = this.quickSortSteps([...this.array]); break;
+                case 'heap_sort':      this.generator = this.heapSortSteps([...this.array]); break;
+                case 'shell_sort':     this.generator = this.shellSortSteps([...this.array]); break;
+                default:               this.generator = this.bubbleSortSteps([...this.array]);
+            }
+        }
+
+        const result = this.generator.next();
+        if (!result.done) {
+            const { arr, indices, action } = result.value;
+            this.array = arr;
+            this.opsCount++;
+            
+            const highlights = {};
+            indices.forEach(idx => { highlights[idx] = action; });
+            this.draw(highlights);
+            return true;
+        } else {
+            this.array = result.value.arr || this.array;
+            this.array.forEach((_, i) => this.sortedIndices.add(i));
+            this.isComplete = true;
+            this.draw();
+            return false;
+        }
     }
 
     *bubbleSortSteps(arr) {
         const n = arr.length;
         for (let i = 0; i < n - 1; i++) {
             for (let j = 0; j < n - i - 1; j++) {
-                yield { indices: [j, j + 1], action: 'compare' };
+                yield { arr: [...arr], indices: [j, j + 1], action: 'compare' };
                 if (arr[j] > arr[j + 1]) {
-                    yield { indices: [j, j + 1], action: 'swap' };
                     [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                    yield { arr: [...arr], indices: [j, j + 1], action: 'swap' };
                 }
             }
             this.sortedIndices.add(n - 1 - i);
         }
         this.sortedIndices.add(0);
+        return { arr };
     }
 
     *selectionSortSteps(arr) {
@@ -78,16 +122,17 @@ class Visualizer {
         for (let i = 0; i < n - 1; i++) {
             let minIdx = i;
             for (let j = i + 1; j < n; j++) {
-                yield { indices: [minIdx, j], action: 'compare' };
+                yield { arr: [...arr], indices: [minIdx, j], action: 'compare' };
                 if (arr[j] < arr[minIdx]) minIdx = j;
             }
             if (minIdx !== i) {
-                yield { indices: [i, minIdx], action: 'swap' };
                 [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                yield { arr: [...arr], indices: [i, minIdx], action: 'swap' };
             }
             this.sortedIndices.add(i);
         }
         this.sortedIndices.add(n - 1);
+        return { arr };
     }
 
     *insertionSortSteps(arr) {
@@ -96,10 +141,10 @@ class Visualizer {
         for (let i = 1; i < n; i++) {
             let j = i;
             while (j > 0) {
-                yield { indices: [j - 1, j], action: 'compare' };
+                yield { arr: [...arr], indices: [j - 1, j], action: 'compare' };
                 if (arr[j] < arr[j - 1]) {
-                    yield { indices: [j - 1, j], action: 'swap' };
                     [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]];
+                    yield { arr: [...arr], indices: [j - 1, j], action: 'swap' };
                     j--;
                 } else {
                     break;
@@ -107,6 +152,7 @@ class Visualizer {
             }
             this.sortedIndices.add(i);
         }
+        return { arr };
     }
 
     *mergeSortSteps(arr) {
@@ -119,19 +165,26 @@ class Visualizer {
                 const right = arr.slice(mid, hi);
                 let i = 0, j = 0, k = lo;
                 while (i < left.length && j < right.length) {
-                    yield { indices: [lo + i, mid + j], action: 'compare' };
+                    yield { arr: [...arr], indices: [lo + i, mid + j], action: 'compare' };
                     if (left[i] <= right[j]) {
                         arr[k++] = left[i++];
                     } else {
                         arr[k++] = right[j++];
                     }
-                    yield { indices: [k - 1], action: 'swap' };
+                    yield { arr: [...arr], indices: [k - 1], action: 'swap' };
                 }
-                while (i < left.length) { arr[k++] = left[i++]; }
-                while (j < right.length) { arr[k++] = right[j++]; }
+                while (i < left.length) { 
+                    arr[k++] = left[i++]; 
+                    yield { arr: [...arr], indices: [k - 1], action: 'swap' };
+                }
+                while (j < right.length) { 
+                    arr[k++] = right[j++]; 
+                    yield { arr: [...arr], indices: [k - 1], action: 'swap' };
+                }
             }
         }
         for (let i = 0; i < n; i++) this.sortedIndices.add(i);
+        return { arr };
     }
 
     *quickSortSteps(arr) {
@@ -142,101 +195,85 @@ class Visualizer {
                 if (lo === hi) this.sortedIndices.add(lo);
                 continue;
             }
-            // Lomuto partition
             const pivot = arr[hi];
             let i = lo - 1;
             for (let j = lo; j < hi; j++) {
-                yield { indices: [j, hi], action: 'compare' };
+                yield { arr: [...arr], indices: [j, hi], action: 'compare' };
                 if (arr[j] <= pivot) {
                     i++;
-                    yield { indices: [i, j], action: 'swap' };
                     [arr[i], arr[j]] = [arr[j], arr[i]];
+                    yield { arr: [...arr], indices: [i, j], action: 'swap' };
                 }
             }
-            yield { indices: [i + 1, hi], action: 'swap' };
             [arr[i + 1], arr[hi]] = [arr[hi], arr[i + 1]];
+            yield { arr: [...arr], indices: [i + 1, hi], action: 'swap' };
             const p = i + 1;
             this.sortedIndices.add(p);
             stack.push([lo, p - 1]);
             stack.push([p + 1, hi]);
         }
+        return { arr };
     }
 
-    step() {
-        if (!this.generator) {
-            const algo = document.getElementById('viz-algorithm')?.value || 'bubble_sort';
-            switch (algo) {
-                case 'bubble_sort':    this.generator = this.bubbleSortSteps(this.array);    break;
-                case 'selection_sort': this.generator = this.selectionSortSteps(this.array); break;
-                case 'insertion_sort': this.generator = this.insertionSortSteps(this.array); break;
-                case 'merge_sort':     this.generator = this.mergeSortSteps(this.array);     break;
-                case 'quick_sort':     this.generator = this.quickSortSteps(this.array);     break;
-                default:               this.generator = this.bubbleSortSteps(this.array);
+    *heapSortSteps(arr) {
+        const n = arr.length;
+        
+        const heapify = function* (arr, n, i) {
+            let largest = i;
+            const l = 2 * i + 1;
+            const r = 2 * i + 2;
+            
+            if (l < n) {
+                yield { arr: [...arr], indices: [l, largest], action: 'compare' };
+                if (arr[l] > arr[largest]) largest = l;
+            }
+            if (r < n) {
+                yield { arr: [...arr], indices: [r, largest], action: 'compare' };
+                if (arr[r] > arr[largest]) largest = r;
+            }
+            
+            if (largest !== i) {
+                [arr[i], arr[largest]] = [arr[largest], arr[i]];
+                yield { arr: [...arr], indices: [i, largest], action: 'swap' };
+                yield* heapify(arr, n, largest);
+            }
+        };
+
+        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+            yield* heapify(arr, n, i);
+        }
+        
+        for (let i = n - 1; i > 0; i--) {
+            [arr[0], arr[i]] = [arr[i], arr[0]];
+            yield { arr: [...arr], indices: [0, i], action: 'swap' };
+            this.sortedIndices.add(i);
+            yield* heapify(arr, i, 0);
+        }
+        this.sortedIndices.add(0);
+        return { arr };
+    }
+
+    *shellSortSteps(arr) {
+        const n = arr.length;
+        for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+            for (let i = gap; i < n; i++) {
+                let temp = arr[i];
+                let j = i;
+                while (j >= gap) {
+                    yield { arr: [...arr], indices: [j - gap, i], action: 'compare' };
+                    if (arr[j - gap] > temp) {
+                        arr[j] = arr[j - gap];
+                        yield { arr: [...arr], indices: [j, j - gap], action: 'swap' };
+                        j -= gap;
+                    } else {
+                        break;
+                    }
+                }
+                arr[j] = temp;
+                yield { arr: [...arr], indices: [j], action: 'swap' };
             }
         }
-
-        const result = this.generator.next();
-        if (!result.done) {
-            const { indices, action } = result.value;
-            const highlights = {};
-            indices.forEach(idx => { highlights[idx] = action; });
-            this.draw(highlights);
-        } else {
-            // Sort complete — mark all as sorted and stop
-            this.array.forEach((_, i) => this.sortedIndices.add(i));
-            this.draw();
-            this.pause();
-            this.generator = null;
-        }
-    }
-
-    play() {
-        if (this.intervalId) return;
-        this.intervalId = setInterval(() => this.step(), this.speed);
-    }
-
-    pause() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-        }
+        for (let i = 0; i < n; i++) this.sortedIndices.add(i);
+        return { arr };
     }
 }
-
-const visualizer = new Visualizer('sortCanvas');
-
-document.getElementById('viz-generate')?.addEventListener('click', () => {
-    visualizer.generateArray();
-});
-
-document.getElementById('viz-step')?.addEventListener('click', () => {
-    visualizer.step();
-});
-
-document.getElementById('viz-play')?.addEventListener('click', () => {
-    visualizer.play();
-});
-
-document.getElementById('viz-pause')?.addEventListener('click', () => {
-    visualizer.pause();
-});
-
-document.getElementById('viz-reset')?.addEventListener('click', () => {
-    visualizer.generateArray();
-});
-
-// Changing algorithm resets the visualizer with a fresh array
-document.getElementById('viz-algorithm')?.addEventListener('change', () => {
-    visualizer.generateArray();
-});
-
-// Speed slider: value 1-100 maps to delay 400ms-5ms (inverted)
-document.getElementById('viz-speed')?.addEventListener('input', (e) => {
-    const sliderVal = parseInt(e.target.value, 10);
-    visualizer.speed = Math.round(405 - sliderVal * 4);
-    // If already playing, restart the interval with the new speed
-    if (visualizer.intervalId) {
-        visualizer.pause();
-        visualizer.play();
-    }
-});

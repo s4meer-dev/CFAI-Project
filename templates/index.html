@@ -3,152 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Benchmark and visualize sorting and searching algorithms — compare execution time, memory usage, and time/space complexity in real time.">
-    <title>Algorithm Benchmark &amp; Complexity Visualization</title>
+    <title>Compare Sorting Algorithms</title>
+    <!-- Modern Font: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Background elements for aesthetic -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    
     <header>
-        <h1>Algorithm Benchmark Visualizer</h1>
-        <p>Benchmark · Visualize · Compare — 12 algorithms, live charts &amp; step-by-step animations</p>
+        <h1>Sorting Visualizer <span>Pro</span></h1>
+        <p>Side-by-Side Algorithm Comparison</p>
     </header>
+    
     <main class="container">
-        <section class="controls-section">
-            <div class="card">
-                <h2>Configure Benchmark</h2>
-                <form id="benchmark-form">
-                    <div class="form-group">
-                        <label for="algorithm">Algorithm Type</label>
-                        <select id="algorithm" name="algorithm">
-                            <optgroup label="Sorting Algorithms">
-                                <option value="bubble_sort">Bubble Sort</option>
-                                <option value="selection_sort">Selection Sort</option>
-                                <option value="insertion_sort">Insertion Sort</option>
-                                <option value="merge_sort">Merge Sort</option>
-                                <option value="quick_sort">Quick Sort</option>
-                                <option value="heap_sort">Heap Sort</option>
-                                <option value="shell_sort">Shell Sort</option>
-                                <option value="counting_sort">Counting Sort</option>
-                            </optgroup>
-                            <optgroup label="Searching Algorithms">
-                                <option value="linear_search">Linear Search</option>
-                                <option value="binary_search">Binary Search</option>
-                                <option value="jump_search">Jump Search</option>
-                                <option value="exponential_search">Exponential Search</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="data-size">Data Size</label>
-                            <input type="number" id="data-size" name="data-size" value="1000" min="10" max="100000">
-                        </div>
-                        <div class="form-group">
-                            <label for="data-type">Initial Data State</label>
-                            <select id="data-type" name="data-type">
-                                <option value="random">Randomly Shuffled</option>
-                                <option value="sorted">Already Sorted</option>
-                                <option value="reversed">Reverse Sorted</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="iterations">Iterations (for average)</label>
-                        <input type="number" id="iterations" name="iterations" value="5" min="1" max="50">
-                    </div>
-                    <div class="button-group">
-                        <button type="submit" class="btn-primary">Run Benchmark</button>
-                        <button type="button" id="clear-chart" class="btn-secondary">Clear Chart</button>
-                        <button type="button" id="export-csv" class="btn-secondary">Export to CSV</button>
-                    </div>
-                </form>
+        <!-- Global Controls (Top Panel) -->
+        <section class="glass-panel global-controls">
+            <div class="control-group input-mode">
+                <label>Array Input Mode</label>
+                <div class="input-toggle">
+                    <label><input type="radio" name="input_mode" value="random" checked> Random Array</label>
+                    <label><input type="radio" name="input_mode" value="custom"> Custom Input</label>
+                </div>
             </div>
             
-            <div class="card" style="margin-top: 2rem;">
-                <h2>Benchmark History</h2>
-                <div class="table-container" style="overflow-x: auto;">
-                    <table id="history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <th style="padding: 0.5rem;">Algorithm</th>
-                                <th style="padding: 0.5rem;">Size</th>
-                                <th style="padding: 0.5rem;">Time (ms)</th>
-                                <th style="padding: 0.5rem;">Memory (B)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- History rows will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
+            <div class="control-group random-controls">
+                <label for="array-size">Array Size: <span id="size-val" style="color:var(--accent-1);font-weight:bold;">50</span></label>
+                <input type="range" id="array-size" min="10" max="200" value="50">
+            </div>
+            
+            <div class="control-group custom-controls hidden">
+                <label for="custom-input">Custom Array (space-separated)</label>
+                <input type="text" id="custom-input" placeholder="e.g. 5 12 3 8 1 90">
+            </div>
+
+            <div class="control-group">
+                <button id="btn-generate" class="btn-primary">Generate Array</button>
+            </div>
+            
+            <div class="control-divider"></div>
+            
+            <div class="control-group playback-controls">
+                <button id="btn-play" class="btn-play">▶ Play</button>
+                <button id="btn-pause" class="btn-pause hidden">⏸ Pause</button>
+                <button id="btn-step" class="btn-step">⏭ Step</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="play-speed">Speed</label>
+                <input type="range" id="play-speed" min="1" max="100" value="50">
             </div>
         </section>
 
-        <section class="controls-section" style="grid-column: 1;">
-            <div class="card" id="complexity-info">
-                <h2>Algorithm Complexity</h2>
-                <div class="complexity-info-row">
-                    <div>
-                        <span class="complexity-label">Time Complexity</span>
-                        <span class="complexity-badge" id="time-complexity-badge">—</span>
-                    </div>
-                    <div>
-                        <span class="complexity-label">Space Complexity</span>
-                        <span class="complexity-badge" id="space-complexity-badge">—</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="visualization-section">
-            <div class="card">
-                <h2>Performance Visualization</h2>
-                <div class="charts-grid">
-                    <div class="chart-wrapper">
-                        <h3>⏱ Execution Time (ms)</h3>
-                        <div style="position: relative; height: 40vh;">
-                            <canvas id="benchmarkChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-wrapper">
-                        <h3>🧠 Peak Memory (bytes)</h3>
-                        <div style="position: relative; height: 40vh;">
-                            <canvas id="memoryChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="visualizer-section" class="card" style="grid-column: 1 / -1;">
-            <h2>Interactive Sort Visualizer</h2>
-            <div class="visualizer-config">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="viz-algorithm">Algorithm</label>
-                    <select id="viz-algorithm">
+        <!-- Side by Side Layout -->
+        <section class="comparison-grid">
+            <!-- Left Side (Algorithm A) -->
+            <div class="glass-panel visualizer-card card-a">
+                <div class="card-header">
+                    <select id="algo-a" class="algo-select">
                         <option value="bubble_sort">Bubble Sort</option>
                         <option value="selection_sort">Selection Sort</option>
                         <option value="insertion_sort">Insertion Sort</option>
                         <option value="merge_sort">Merge Sort</option>
                         <option value="quick_sort">Quick Sort</option>
+                        <option value="heap_sort">Heap Sort</option>
+                        <option value="shell_sort">Shell Sort</option>
                     </select>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="viz-speed">Speed</label>
-                    <input type="range" id="viz-speed" min="1" max="100" value="50">
+                
+                <div class="stats-row">
+                    <div class="stat-badge">Time: <span id="time-a">—</span></div>
+                    <div class="stat-badge">Space: <span id="space-a">—</span></div>
+                    <div class="stat-badge ops-badge">Ops: <span id="ops-a">0</span></div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="canvas-a"></canvas>
                 </div>
             </div>
-            <canvas id="sortCanvas" height="300"></canvas>
-            <div class="visualizer-controls">
-                <button id="viz-generate" class="btn-secondary">⚡ Generate Array</button>
-                <button id="viz-play" class="btn-primary">▶ Play</button>
-                <button id="viz-pause" class="btn-secondary">⏸ Pause</button>
-                <button id="viz-step" class="btn-secondary">⏭ Step</button>
-                <button id="viz-reset" class="btn-secondary">↺ Reset</button>
+
+            <!-- Right Side (Algorithm B) -->
+            <div class="glass-panel visualizer-card card-b">
+                <div class="card-header">
+                    <select id="algo-b" class="algo-select">
+                        <option value="bubble_sort">Bubble Sort</option>
+                        <option value="selection_sort">Selection Sort</option>
+                        <option value="insertion_sort">Insertion Sort</option>
+                        <option value="merge_sort">Merge Sort</option>
+                        <option value="quick_sort" selected>Quick Sort</option>
+                        <option value="heap_sort">Heap Sort</option>
+                        <option value="shell_sort">Shell Sort</option>
+                    </select>
+                </div>
+                
+                <div class="stats-row">
+                    <div class="stat-badge">Time: <span id="time-b">—</span></div>
+                    <div class="stat-badge">Space: <span id="space-b">—</span></div>
+                    <div class="stat-badge ops-badge">Ops: <span id="ops-b">0</span></div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="canvas-b"></canvas>
+                </div>
             </div>
         </section>
     </main>
+
     <script src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

@@ -1,243 +1,190 @@
-// static/js/main.js
-let benchmarkChart;
-let memoryChart;
+// Controller for the two visualizers
+const vizA = new Visualizer('canvas-a', '#06b6d4'); // Cyan
+const vizB = new Visualizer('canvas-b', '#8b5cf6'); // Violet
+
+let masterArray = [];
+let isPlaying = false;
+let animationFrameId = null;
+let lastStepTime = 0;
+let speedMs = 50;
+
+let complexityData = {};
 
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('benchmark-form');
+    fetch('/api/complexity')
+        .then(res => res.json())
+        .then(data => {
+            complexityData = data;
+            updateBadges('a');
+            updateBadges('b');
+        });
+
+    setupEventListeners();
+    generateNewArray();
     
-    if (form) {
-        form.addEventListener('submit', handleFormSubmit);
-    }
-
-    const clearBtn = document.getElementById('clear-chart');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            benchmarkChart.data.labels = [];
-            benchmarkChart.data.datasets[0].data = [];
-            benchmarkChart.update();
-            memoryChart.data.labels = [];
-            memoryChart.data.datasets[0].data = [];
-            memoryChart.update();
-            const tbody = document.querySelector('#history-table tbody');
-            if (tbody) tbody.innerHTML = '';
-        });
-    }
-
-    const exportBtn = document.getElementById('export-csv');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', exportTableToCSV);
-    }
-
-    // Preload complexity data and wire up the dropdown change listener
-    const algorithmSelect = document.getElementById('algorithm');
-    let complexityData = {};
-
-    if (algorithmSelect) {
-        fetch('/api/complexity')
-            .then(res => res.json())
-            .then(data => {
-                complexityData = data;
-                updateComplexityBadges(algorithmSelect.value, complexityData);
-            });
-
-        algorithmSelect.addEventListener('change', () => {
-            updateComplexityBadges(algorithmSelect.value, complexityData);
-        });
-    }
-
-    initChart();
-    initMemoryChart();
+    // Handle resizing
+    window.addEventListener('resize', () => {
+        vizA.draw();
+        vizB.draw();
+    });
 });
 
-function updateComplexityBadges(algorithm, data) {
-    const info = data[algorithm] || {};
-    const timeBadge = document.getElementById('time-complexity-badge');
-    const spaceBadge = document.getElementById('space-complexity-badge');
-    if (timeBadge) timeBadge.textContent = info.time || '—';
-    if (spaceBadge) spaceBadge.textContent = info.space || '—';
-}
-
-function initChart() {
-    const ctx = document.getElementById('benchmarkChart').getContext('2d');
-    benchmarkChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Execution Time (ms)',
-                data: [],
-                backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                borderColor: 'rgba(99, 102, 241, 1)',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Time (ms)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Algorithm Config'
-                    }
-                }
+function setupEventListeners() {
+    // Mode toggle
+    document.querySelectorAll('input[name="input_mode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'random') {
+                document.querySelector('.random-controls').classList.remove('hidden');
+                document.querySelector('.custom-controls').classList.add('hidden');
+            } else {
+                document.querySelector('.random-controls').classList.add('hidden');
+                document.querySelector('.custom-controls').classList.remove('hidden');
             }
-        }
+        });
+    });
+
+    // Array Size Slider
+    document.getElementById('array-size').addEventListener('input', (e) => {
+        document.getElementById('size-val').textContent = e.target.value;
+    });
+
+    // Generate Array
+    document.getElementById('btn-generate').addEventListener('click', () => {
+        generateNewArray();
+    });
+
+    // Speed Slider (1-100 mapped to delay)
+    document.getElementById('play-speed').addEventListener('input', (e) => {
+        const sliderVal = parseInt(e.target.value, 10);
+        // Map 1-100 to roughly 200ms - 2ms
+        speedMs = Math.round(202 - sliderVal * 2);
+    });
+
+    // Algorithms
+    document.getElementById('algo-a').addEventListener('change', (e) => {
+        vizA.setAlgorithm(e.target.value);
+        vizA.setArray(masterArray);
+        updateBadges('a');
+        resetOps();
+        pause();
+    });
+    document.getElementById('algo-b').addEventListener('change', (e) => {
+        vizB.setAlgorithm(e.target.value);
+        vizB.setArray(masterArray);
+        updateBadges('b');
+        resetOps();
+        pause();
+    });
+
+    // Playback
+    document.getElementById('btn-play').addEventListener('click', play);
+    document.getElementById('btn-pause').addEventListener('click', pause);
+    document.getElementById('btn-step').addEventListener('click', () => {
+        pause();
+        stepBoth();
     });
 }
 
-function initMemoryChart() {
-    const ctx = document.getElementById('memoryChart').getContext('2d');
-    memoryChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Peak Memory (bytes)',
-                data: [],
-                backgroundColor: 'rgba(251, 146, 60, 0.7)',
-                borderColor: 'rgba(251, 146, 60, 1)',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Memory (bytes)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Algorithm Config'
-                    }
-                }
+function updateBadges(side) {
+    const algo = document.getElementById(`algo-${side}`).value;
+    const info = complexityData[algo] || {};
+    document.getElementById(`time-${side}`).textContent = info.time || '—';
+    document.getElementById(`space-${side}`).textContent = info.space || '—';
+}
+
+function resetOps() {
+    document.getElementById('ops-a').textContent = '0';
+    document.getElementById('ops-b').textContent = '0';
+}
+
+function generateNewArray() {
+    pause();
+    const mode = document.querySelector('input[name="input_mode"]:checked').value;
+    if (mode === 'random') {
+        const size = parseInt(document.getElementById('array-size').value, 10);
+        masterArray = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+    } else {
+        const inputStr = document.getElementById('custom-input').value.trim();
+        if (inputStr) {
+            masterArray = inputStr.split(/\s+/).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+            if (masterArray.length === 0) {
+                alert("Please enter valid space-separated numbers.");
+                return;
             }
+        } else {
+            // fallback
+            masterArray = [50, 20, 80, 10, 90, 30, 40, 70, 60];
         }
-    });
+    }
+
+    vizA.setAlgorithm(document.getElementById('algo-a').value);
+    vizB.setAlgorithm(document.getElementById('algo-b').value);
+    
+    vizA.setArray(masterArray);
+    vizB.setArray(masterArray);
+    resetOps();
 }
 
-function updateChart(label, time) {
-    benchmarkChart.data.labels.push(label);
-    benchmarkChart.data.datasets[0].data.push(time);
-    benchmarkChart.update();
+function play() {
+    if (isPlaying) return;
+    isPlaying = true;
+    document.getElementById('btn-play').classList.add('hidden');
+    document.getElementById('btn-pause').classList.remove('hidden');
+    
+    lastStepTime = performance.now();
+    animationFrameId = requestAnimationFrame(animate);
 }
 
-function updateMemoryChart(label, memory) {
-    memoryChart.data.labels.push(label);
-    memoryChart.data.datasets[0].data.push(memory);
-    memoryChart.update();
+function pause() {
+    if (!isPlaying) return;
+    isPlaying = false;
+    document.getElementById('btn-play').classList.remove('hidden');
+    document.getElementById('btn-pause').classList.add('hidden');
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+    }
 }
 
-function addHistoryRow(data) {
-    const tbody = document.querySelector('#history-table tbody');
-    if (!tbody) return;
+function stepBoth() {
+    const steppedA = vizA.step();
+    const steppedB = vizB.step();
     
-    const row = document.createElement('tr');
-    row.style.borderBottom = '1px solid var(--border-color)';
+    document.getElementById('ops-a').textContent = vizA.opsCount;
+    document.getElementById('ops-b').textContent = vizB.opsCount;
     
-    const memBytes = data.memory_usage_bytes || 0;
-    
-    row.innerHTML = `
-        <td style="padding: 0.5rem;">${data.algorithm.replaceAll('_', ' ')}</td>
-        <td style="padding: 0.5rem;">${data.size} (${data.data_type})</td>
-        <td style="padding: 0.5rem;">${data.execution_time_ms.toFixed(4)}</td>
-        <td style="padding: 0.5rem;">${memBytes.toFixed(2)}</td>
-    `;
-    
-    tbody.prepend(row);
+    return steppedA || steppedB;
 }
 
-function exportTableToCSV() {
-    const table = document.getElementById('history-table');
-    if (!table) return;
+function animate(currentTime) {
+    if (!isPlaying) return;
     
-    let csv = [];
-    const rows = table.querySelectorAll('tr');
+    let timeElapsed = currentTime - lastStepTime;
+    let stepsToPerform = 0;
     
-    for (let i = 0; i < rows.length; i++) {
-        let row = [], cols = rows[i].querySelectorAll('td, th');
-        
-        for (let j = 0; j < cols.length; j++) {
-            row.push('"' + cols[j].innerText + '"');
+    if (speedMs < 16) {
+        // High speed: perform multiple steps per frame
+        stepsToPerform = Math.floor(16 / speedMs) || 1;
+        lastStepTime = currentTime;
+    } else {
+        // Slower speed: wait for delay
+        if (timeElapsed >= speedMs) {
+            stepsToPerform = 1;
+            lastStepTime = currentTime;
         }
-        csv.push(row.join(','));
+    }
+
+    let isAnyRunning = false;
+    for (let i = 0; i < stepsToPerform; i++) {
+        if (stepBoth()) {
+            isAnyRunning = true;
+        } else {
+            break;
+        }
     }
     
-    downloadCSV(csv.join('\n'), 'benchmark_history.csv');
-}
-
-function downloadCSV(csv, filename) {
-    let csvFile;
-    let downloadLink;
-
-    csvFile = new Blob([csv], {type: "text/csv"});
-    downloadLink = document.createElement("a");
-    downloadLink.download = filename;
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-}
-
-async function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const algorithm = form.elements['algorithm'].value;
-    const dataSize = parseInt(form.elements['data-size'].value, 10);
-    const dataType = form.elements['data-type'].value;
-    const iterations = parseInt(form.elements['iterations'].value, 10);
-    const btn = form.querySelector('button[type="submit"]');
-    
-    const payload = {
-        algorithm: algorithm,
-        data_size: dataSize,
-        data_type: dataType,
-        iterations: iterations
-    };
-    
-    btn.disabled = true;
-    btn.textContent = 'Running...';
-    
-    try {
-        const response = await fetch('/api/benchmark', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        const data = await response.json();
-        if (data.status === 'success') {
-            const label = `${algorithm.replaceAll('_', ' ')} (${dataType.charAt(0)}, n=${data.size})`;
-            updateChart(label, data.execution_time_ms);
-            updateMemoryChart(label, data.memory_usage_bytes);
-            addHistoryRow(data);
-        } else {
-            alert('Failed to run benchmark');
-        }
-    } catch (error) {
-        console.error('Error fetching benchmark:', error);
-        alert('An error occurred during benchmark execution.');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Run Benchmark';
+    if (isAnyRunning) {
+        animationFrameId = requestAnimationFrame(animate);
+    } else {
+        pause();
     }
 }
