@@ -166,12 +166,18 @@ function stepBoth() {
 function animate(currentTime) {
     if (!isPlaying) return;
     
+    if (vizA.isComplete && vizB.isComplete) {
+        pause();
+        return;
+    }
+    
     let timeElapsed = currentTime - lastStepTime;
     let stepsToPerform = 0;
     
     if (speedMs < 16) {
-        // High speed: perform multiple steps per frame
-        stepsToPerform = Math.floor(16 / speedMs) || 1;
+        // High speed: perform multiple steps per frame. Avoid division by zero.
+        let effectiveSpeed = Math.max(speedMs, 0.1);
+        stepsToPerform = Math.floor(16 / effectiveSpeed) || 1;
         lastStepTime = currentTime;
     } else {
         // Slower speed: wait for delay
@@ -181,18 +187,13 @@ function animate(currentTime) {
         }
     }
 
-    let isAnyRunning = false;
     for (let i = 0; i < stepsToPerform; i++) {
-        if (stepBoth()) {
-            isAnyRunning = true;
-        } else {
-            break;
+        stepBoth();
+        if (vizA.isComplete && vizB.isComplete) {
+            pause();
+            return;
         }
     }
     
-    if (isAnyRunning) {
-        animationFrameId = requestAnimationFrame(animate);
-    } else {
-        pause();
-    }
+    animationFrameId = requestAnimationFrame(animate);
 }
