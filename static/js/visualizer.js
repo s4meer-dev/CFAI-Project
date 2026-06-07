@@ -11,8 +11,8 @@ class Visualizer {
         this.sortedIndices = new Set();
     }
 
-    draw() {
-        const { canvas, ctx, array } = this;
+    draw(highlights = {}) {
+        const { canvas, ctx, array, sortedIndices } = this;
         if (!ctx) return;
 
         // Sync canvas pixel width to its rendered CSS width
@@ -28,7 +28,14 @@ class Visualizer {
 
         array.forEach((val, i) => {
             const barHeight = (val / maxVal) * (canvas.height - 10);
-            ctx.fillStyle = '#00ffcc';
+
+            // Priority: swap > compare > sorted > default
+            let color = '#00ffcc';                        // default teal
+            if (sortedIndices.has(i)) color = '#22c55e'; // green  — sorted
+            if (highlights[i] === 'compare') color = '#facc15'; // yellow
+            if (highlights[i] === 'swap')    color = '#ef4444'; // red
+
+            ctx.fillStyle = color;
             ctx.fillRect(
                 i * barWidth + 1,
                 canvas.height - barHeight,
