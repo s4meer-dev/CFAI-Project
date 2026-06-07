@@ -186,3 +186,37 @@ header h1 {
         grid-template-columns: 1fr;
     }
 }
+
+/* Complexity info panel */
+.complexity-info-row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.complexity-info-row > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.complexity-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    font-weight: 500;
+}
+
+.complexity-badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    background-color: rgba(0, 255, 204, 0.08);
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    border-radius: 999px;
+    color: var(--accent-color);
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
