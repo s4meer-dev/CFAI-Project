@@ -101,6 +101,31 @@ class Visualizer {
             this.sortedIndices.add(i);
         }
     }
+
+    *mergeSortSteps(arr) {
+        const n = arr.length;
+        for (let width = 1; width < n; width *= 2) {
+            for (let lo = 0; lo < n; lo += 2 * width) {
+                const mid = Math.min(lo + width, n);
+                const hi = Math.min(lo + 2 * width, n);
+                const left = arr.slice(lo, mid);
+                const right = arr.slice(mid, hi);
+                let i = 0, j = 0, k = lo;
+                while (i < left.length && j < right.length) {
+                    yield { indices: [lo + i, mid + j], action: 'compare' };
+                    if (left[i] <= right[j]) {
+                        arr[k++] = left[i++];
+                    } else {
+                        arr[k++] = right[j++];
+                    }
+                    yield { indices: [k - 1], action: 'swap' };
+                }
+                while (i < left.length) { arr[k++] = left[i++]; }
+                while (j < right.length) { arr[k++] = right[j++]; }
+            }
+        }
+        for (let i = 0; i < n; i++) this.sortedIndices.add(i);
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
