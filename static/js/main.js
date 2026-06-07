@@ -27,10 +27,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportBtn) {
         exportBtn.addEventListener('click', exportTableToCSV);
     }
-    
+
+    // Preload complexity data and wire up the dropdown change listener
+    const algorithmSelect = document.getElementById('algorithm');
+    let complexityData = {};
+
+    fetch('/api/complexity')
+        .then(res => res.json())
+        .then(data => {
+            complexityData = data;
+            updateComplexityBadges(algorithmSelect.value, complexityData);
+        });
+
+    if (algorithmSelect) {
+        algorithmSelect.addEventListener('change', () => {
+            updateComplexityBadges(algorithmSelect.value, complexityData);
+        });
+    }
+
     initChart();
     initMemoryChart();
 });
+
+function updateComplexityBadges(algorithm, data) {
+    const info = data[algorithm] || {};
+    const timeBadge = document.getElementById('time-complexity-badge');
+    const spaceBadge = document.getElementById('space-complexity-badge');
+    if (timeBadge) timeBadge.textContent = info.time || '—';
+    if (spaceBadge) spaceBadge.textContent = info.space || '—';
+}
 
 function initChart() {
     const ctx = document.getElementById('benchmarkChart').getContext('2d');
