@@ -224,3 +224,19 @@ document.getElementById('viz-pause')?.addEventListener('click', () => {
 document.getElementById('viz-reset')?.addEventListener('click', () => {
     visualizer.generateArray();
 });
+
+// Changing algorithm resets the visualizer with a fresh array
+document.getElementById('viz-algorithm')?.addEventListener('change', () => {
+    visualizer.generateArray();
+});
+
+// Speed slider: value 1-100 maps to delay 400ms-5ms (inverted)
+document.getElementById('viz-speed')?.addEventListener('input', (e) => {
+    const sliderVal = parseInt(e.target.value, 10);
+    visualizer.speed = Math.round(405 - sliderVal * 4);
+    // If already playing, restart the interval with the new speed
+    if (visualizer.intervalId) {
+        visualizer.pause();
+        visualizer.play();
+    }
+});
