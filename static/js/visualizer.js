@@ -82,6 +82,25 @@ class Visualizer {
         }
         this.sortedIndices.add(n - 1);
     }
+
+    *insertionSortSteps(arr) {
+        const n = arr.length;
+        this.sortedIndices.add(0);
+        for (let i = 1; i < n; i++) {
+            let j = i;
+            while (j > 0) {
+                yield { indices: [j - 1, j], action: 'compare' };
+                if (arr[j] < arr[j - 1]) {
+                    yield { indices: [j - 1, j], action: 'swap' };
+                    [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]];
+                    j--;
+                } else {
+                    break;
+                }
+            }
+            this.sortedIndices.add(i);
+        }
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
