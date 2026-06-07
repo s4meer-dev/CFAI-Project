@@ -290,6 +290,7 @@ input[type="number"].num-input:focus {
     font-family: 'Courier New', monospace;
     font-weight: 700;
     margin-left: 0.5rem;
+    white-space: nowrap;
 }
 .ops-badge span {
     color: var(--accent-1);
