@@ -245,3 +245,40 @@ header h1 {
     padding: 0.55rem 1.1rem;
     font-size: 0.9rem;
 }
+
+/* Visualizer config row (algo select + speed slider) */
+.visualizer-config {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1.25rem;
+}
+
+.visualizer-config .form-group {
+    flex: 1;
+    min-width: 160px;
+}
+
+/* Range slider */
+.form-group input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--border-color);
+    border: none;
+    border-radius: 3px;
+    padding: 0;
+    cursor: pointer;
+    accent-color: var(--accent-color);
+}
+
+.form-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0, 255, 204, 0.5);
+}
