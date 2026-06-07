@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
             benchmarkChart.data.labels = [];
             benchmarkChart.data.datasets[0].data = [];
             benchmarkChart.update();
+            memoryChart.data.labels = [];
+            memoryChart.data.datasets[0].data = [];
+            memoryChart.update();
             const tbody = document.querySelector('#history-table tbody');
             if (tbody) tbody.innerHTML = '';
         });
