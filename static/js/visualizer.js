@@ -48,6 +48,10 @@ class Visualizer {
             this.actions.push({ type: 'swap', indices: [i, j] }); 
             const temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;
         };
+        const overwrite = (i, val) => {
+            this.actions.push({ type: 'overwrite', index: i, value: val, oldValue: arr[i] });
+            arr[i] = val;
+        };
         const markSorted = (i) => { this.actions.push({ type: 'sorted', index: i }); };
         
         const n = arr.length;
@@ -94,28 +98,30 @@ class Visualizer {
                 break;
 
             case 'merge_sort':
-                for (let width = 1; width < n; width *= 2) {
-                    for (let lo = 0; lo < n; lo += 2 * width) {
-                        let mid = Math.min(lo + width, n);
-                        let hi = Math.min(lo + 2 * width, n);
-                        let i = lo, j = mid;
-                        while (i < j && j < hi) {
-                            compare(i, j);
-                            if (arr[i] <= arr[j]) {
-                                i++;
-                            } else {
-                                let index = j;
-                                while (index > i) {
-                                    swap(index, index - 1);
-                                    index--;
-                                }
-                                i++;
-                                mid++;
-                                j++;
-                            }
+                const mergeSort = (lo, hi) => {
+                    if (lo >= hi) return;
+                    const mid = Math.floor((lo + hi) / 2);
+                    mergeSort(lo, mid);
+                    mergeSort(mid + 1, hi);
+                    
+                    let i = lo, j = mid + 1;
+                    const temp = [];
+                    while (i <= mid && j <= hi) {
+                        compare(i, j);
+                        if (arr[i] <= arr[j]) {
+                            temp.push(arr[i++]);
+                        } else {
+                            temp.push(arr[j++]);
                         }
                     }
-                }
+                    while (i <= mid) temp.push(arr[i++]);
+                    while (j <= hi) temp.push(arr[j++]);
+                    
+                    for (let k = lo; k <= hi; k++) {
+                        overwrite(k, temp[k - lo]);
+                    }
+                };
+                mergeSort(0, n - 1);
                 for (let i = 0; i < n; i++) markSorted(i);
                 break;
 
@@ -263,6 +269,10 @@ class Visualizer {
             this.highlights[i] = 'swap';
             this.highlights[j] = 'swap';
             this.opsCount++;
+        } else if (action.type === 'overwrite') {
+            this.array[action.index] = action.value;
+            this.highlights[action.index] = 'swap'; // use swap color for overwrites
+            this.opsCount++;
         } else if (action.type === 'sorted') {
             this.sortedIndices.add(action.index);
         }
@@ -297,6 +307,9 @@ class Visualizer {
             const temp = this.array[i];
             this.array[i] = this.array[j];
             this.array[j] = temp;
+            this.opsCount--;
+        } else if (action.type === 'overwrite') {
+            this.array[action.index] = action.oldValue;
             this.opsCount--;
         } else if (action.type === 'sorted') {
             this.sortedIndices.delete(action.index);
