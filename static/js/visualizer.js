@@ -37,6 +37,23 @@ class Visualizer {
             );
         });
     }
+
+    generateArray(size = 60) {
+        if (this.intervalId) clearInterval(this.intervalId);
+        this.intervalId = null;
+        this.generator = null;
+        this.sortedIndices = new Set();
+        if (this.canvas.offsetWidth > 0) this.canvas.width = this.canvas.offsetWidth;
+        this.array = Array.from(
+            { length: size },
+            () => Math.floor(Math.random() * (this.canvas.height - 20)) + 10
+        );
+        this.draw();
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
+
+document.getElementById('viz-generate')?.addEventListener('click', () => {
+    visualizer.generateArray();
+});
