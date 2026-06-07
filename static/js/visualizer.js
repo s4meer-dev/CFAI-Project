@@ -189,6 +189,18 @@ class Visualizer {
             this.generator = null;
         }
     }
+
+    play() {
+        if (this.intervalId) return;
+        this.intervalId = setInterval(() => this.step(), this.speed);
+    }
+
+    pause() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    }
 }
 
 const visualizer = new Visualizer('sortCanvas');
@@ -199,4 +211,16 @@ document.getElementById('viz-generate')?.addEventListener('click', () => {
 
 document.getElementById('viz-step')?.addEventListener('click', () => {
     visualizer.step();
+});
+
+document.getElementById('viz-play')?.addEventListener('click', () => {
+    visualizer.play();
+});
+
+document.getElementById('viz-pause')?.addEventListener('click', () => {
+    visualizer.pause();
+});
+
+document.getElementById('viz-reset')?.addEventListener('click', () => {
+    visualizer.generateArray();
 });
