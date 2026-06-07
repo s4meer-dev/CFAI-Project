@@ -54,15 +54,26 @@ class Visualizer {
 
             ctx.fillStyle = fillColor;
             
-            ctx.beginPath();
-            ctx.roundRect(
-                i * barWidth + 1,
-                canvas.height - barHeight,
-                barWidth - 2,
-                barHeight,
-                [4, 4, 0, 0]
-            );
-            ctx.fill();
+            // Draw standard rect if width is too small for rounded corners (perf optimization for large arrays)
+            if (barWidth < 3) {
+                ctx.fillRect(
+                    i * barWidth,
+                    canvas.height - barHeight,
+                    barWidth > 1 ? barWidth : 1, // Ensure it's at least 1px wide
+                    barHeight
+                );
+            } else {
+                // Draw rounded top bar
+                ctx.beginPath();
+                ctx.roundRect(
+                    i * barWidth + 1,
+                    canvas.height - barHeight,
+                    barWidth - 2,
+                    barHeight,
+                    [4, 4, 0, 0]
+                );
+                ctx.fill();
+            }
         });
     }
 

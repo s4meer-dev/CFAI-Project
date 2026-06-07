@@ -6,7 +6,7 @@ let masterArray = [];
 let isPlaying = false;
 let animationFrameId = null;
 let lastStepTime = 0;
-let speedMs = 50;
+let speedMs = 20;
 
 let complexityData = {};
 
@@ -43,9 +43,14 @@ function setupEventListeners() {
         });
     });
 
-    // Array Size Slider
-    document.getElementById('array-size').addEventListener('input', (e) => {
-        document.getElementById('size-val').textContent = e.target.value;
+    // Array Size Input & Suggestions
+    const sizeInput = document.getElementById('array-size-input');
+    
+    document.querySelectorAll('.btn-suggestion').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            sizeInput.value = e.target.getAttribute('data-val');
+            generateNewArray();
+        });
     });
 
     // Generate Array
@@ -53,11 +58,10 @@ function setupEventListeners() {
         generateNewArray();
     });
 
-    // Speed Slider (1-100 mapped to delay)
-    document.getElementById('play-speed').addEventListener('input', (e) => {
-        const sliderVal = parseInt(e.target.value, 10);
-        // Map 1-100 to roughly 200ms - 2ms
-        speedMs = Math.round(202 - sliderVal * 2);
+    // Speed Input
+    const speedInput = document.getElementById('play-speed-input');
+    speedInput.addEventListener('input', (e) => {
+        speedMs = parseInt(e.target.value, 10) || 0;
     });
 
     // Algorithms
@@ -95,13 +99,15 @@ function updateBadges(side) {
 function resetOps() {
     document.getElementById('ops-a').textContent = '0';
     document.getElementById('ops-b').textContent = '0';
+    document.getElementById('sorted-a').textContent = '0';
+    document.getElementById('sorted-b').textContent = '0';
 }
 
 function generateNewArray() {
     pause();
     const mode = document.querySelector('input[name="input_mode"]:checked').value;
     if (mode === 'random') {
-        const size = parseInt(document.getElementById('array-size').value, 10);
+        const size = parseInt(document.getElementById('array-size-input').value, 10) || 50;
         masterArray = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
     } else {
         const inputStr = document.getElementById('custom-input').value.trim();
@@ -151,6 +157,8 @@ function stepBoth() {
     
     document.getElementById('ops-a').textContent = vizA.opsCount;
     document.getElementById('ops-b').textContent = vizB.opsCount;
+    document.getElementById('sorted-a').textContent = vizA.sortedIndices.size;
+    document.getElementById('sorted-b').textContent = vizB.sortedIndices.size;
     
     return steppedA || steppedB;
 }

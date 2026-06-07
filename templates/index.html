@@ -32,8 +32,13 @@
             </div>
             
             <div class="control-group random-controls">
-                <label for="array-size">Array Size: <span id="size-val" style="color:var(--accent-1);font-weight:bold;">50</span></label>
-                <input type="range" id="array-size" min="10" max="200" value="50">
+                <label for="array-size-input">Array Size</label>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <input type="number" id="array-size-input" class="num-input" min="10" max="50000" value="50">
+                    <button type="button" class="btn-suggestion" data-val="100">100</button>
+                    <button type="button" class="btn-suggestion" data-val="1000">1K</button>
+                    <button type="button" class="btn-suggestion" data-val="10000">10K</button>
+                </div>
             </div>
             
             <div class="control-group custom-controls hidden">
@@ -54,8 +59,8 @@
             </div>
             
             <div class="control-group">
-                <label for="play-speed">Speed</label>
-                <input type="range" id="play-speed" min="1" max="100" value="50">
+                <label for="play-speed-input">Speed (ms per step)</label>
+                <input type="number" id="play-speed-input" class="num-input" min="0" max="2000" value="20">
             </div>
         </section>
 
@@ -79,6 +84,7 @@
                     <div class="stat-badge">Time: <span id="time-a">—</span></div>
                     <div class="stat-badge">Space: <span id="space-a">—</span></div>
                     <div class="stat-badge ops-badge">Ops: <span id="ops-a">0</span></div>
+                    <div class="stat-badge sorted-badge">Sorted: <span id="sorted-a">0</span></div>
                 </div>
 
                 <div class="canvas-container">
@@ -104,6 +110,7 @@
                     <div class="stat-badge">Time: <span id="time-b">—</span></div>
                     <div class="stat-badge">Space: <span id="space-b">—</span></div>
                     <div class="stat-badge ops-badge">Ops: <span id="ops-b">0</span></div>
+                    <div class="stat-badge sorted-badge">Sorted: <span id="sorted-b">0</span></div>
                 </div>
 
                 <div class="canvas-container">
