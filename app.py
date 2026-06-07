@@ -265,6 +265,10 @@ def generate_test_data(size, data_type):
 def index():
     return render_template('index.html')
 
+@app.route('/api/complexity', methods=['GET'])
+def get_complexity():
+    return jsonify(COMPLEXITY_MAP)
+
 @app.route('/api/benchmark', methods=['POST'])
 def benchmark():
     data = request.json
